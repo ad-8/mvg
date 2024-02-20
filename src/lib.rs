@@ -2,6 +2,7 @@ use serde::{Deserialize, Serialize};
 
 const MVG_STATIONS: &str = "https://www.mvg.de/.rest/zdm/stations";
 const MVG_DEPARTURES: &str = "https://www.mvg.de/api/fib/v2/departure?globalId=";
+const MVG_LOCATION: &str = "https://www.mvg.de/api/fib/v2/location?query=";
 
 /// Represents a MVG station ("Haltestelle").
 ///
@@ -87,14 +88,62 @@ pub struct DepartureInfo {
 }
 
 /// Retrieve upcoming departures for a station.
-pub async fn request_departures<S: Into<String>>(station_id: S) -> Result<Vec<DepartureInfo>, Box<dyn std::error::Error>> {
-    let url = format!("{}{}", MVG_DEPARTURES, station_id.into());
+pub async fn request_departures<S: Into<String>>(
+    global_id: S,
+) -> Result<Vec<DepartureInfo>, Box<dyn std::error::Error>> {
+    let url = format!("{}{}", MVG_DEPARTURES, global_id.into());
     let resp = reqwest::get(url).await?;
     let departures = resp.json::<Vec<DepartureInfo>>().await?;
 
     Ok(departures)
 }
 
+/// Represents information about a location.
+///
+/// ## Example API Response
+/// ```clojure
+/// {:aliases "Stachus Bf. Bahnhof Muenchen Munchen KA",
+///  :divaId 1,
+///  :globalId "de:09162:1",
+///  :hasZoomData true,
+///  :latitude 48.13951,
+///  :longitude 11.56613,
+///  :name "Karlsplatz (Stachus)",
+///  :place "München",
+///  :surroundingPlanLink "KA",
+///  :tariffZones "m",
+///  :transportTypes ["UBAHN" "BUS" "TRAM" "SBAHN"],
+///  :type "STATION"}
+/// ```
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Location {
+    pub aliases: Option<String>,
+    pub diva_id: Option<u32>,
+    pub global_id: Option<String>,
+    pub has_zoom_data: Option<bool>,
+    pub latitude: Option<f32>,
+    pub longitude: Option<f32>,
+    pub name: Option<String>,
+    pub place: Option<String>,
+    pub surrounding_plan_link: Option<String>,
+    pub tariff_zones: Option<String>,
+    pub transport_types: Option<Vec<String>>,
+    pub r#type: Option<String>,
+}
+
+/// Find a location using a query string.
+///
+/// Returns a list of locations, where the first element is the best match.
+pub async fn find_location<S: Into<String>>(
+    query: S,
+) -> Result<Vec<Location>, Box<dyn std::error::Error>> {
+    let url = format!("{}{}", MVG_LOCATION, query.into());
+    let resp = reqwest::get(url).await?;
+    let locations = resp.json::<Vec<Location>>().await?;
+
+    Ok(locations)
+}
 
 #[cfg(test)]
 mod tests {
