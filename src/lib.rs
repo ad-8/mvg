@@ -1,10 +1,11 @@
 use serde::{Deserialize, Serialize};
 
+const MVG_LOCATION: &str = "https://www.mvg.de/api/fib/v2/location";
+const MVG_STATION_NEARBY: &str = "https://www.mvg.de/api/fib/v2/station/nearby";
+const MVG_DEPARTURE: &str = "https://www.mvg.de/api/fib/v2/departure";
 const MVG_STATIONS: &str = "https://www.mvg.de/.rest/zdm/stations";
 const MVG_STATION_GLOBAL_IDS: &str = "https://www.mvg.de/.rest/zdm/mvgStationGlobalIds";
 const MVG_LINES: &str = "https://www.mvg.de/.rest/zdm/lines";
-const MVG_DEPARTURE: &str = "https://www.mvg.de/api/fib/v2/departure?globalId=";
-const MVG_LOCATION: &str = "https://www.mvg.de/api/fib/v2/location?query=";
 
 /// Represents a MVG station ("Haltestelle").
 ///
@@ -137,7 +138,7 @@ pub struct DepartureInfo {
 pub async fn request_departures<S: Into<String>>(
     global_id: S,
 ) -> Result<Vec<DepartureInfo>, Box<dyn std::error::Error>> {
-    let url = format!("{}{}", MVG_DEPARTURE, global_id.into());
+    let url = format!("{}?globalId={}", MVG_DEPARTURE, global_id.into());
     let resp = reqwest::get(url).await?;
     let departures = resp.json::<Vec<DepartureInfo>>().await?;
 
@@ -165,6 +166,7 @@ pub async fn request_departures<S: Into<String>>(
 #[serde(rename_all = "camelCase")]
 pub struct Location {
     pub aliases: Option<String>,
+    pub distance_in_meters: Option<i32>,
     pub diva_id: Option<u32>,
     pub global_id: Option<String>,
     pub has_zoom_data: Option<bool>,
@@ -184,12 +186,27 @@ pub struct Location {
 pub async fn find_location<S: Into<String>>(
     query: S,
 ) -> Result<Vec<Location>, Box<dyn std::error::Error>> {
-    let url = format!("{}{}", MVG_LOCATION, query.into());
+    let url = format!("{}?query={}", MVG_LOCATION, query.into());
     let resp = reqwest::get(url).await?;
     let locations = resp.json::<Vec<Location>>().await?;
 
     Ok(locations)
 }
+
+/// Find a nearby location via latitude and longitude.
+///
+/// Returns a list of locations, where the first element is the best match.
+pub async fn find_nearby_location(
+    latitude: f32, longitude: f32
+) -> Result<Vec<Location>, Box<dyn std::error::Error>> {
+    let url = format!("{}?latitude={}&longitude={}", MVG_STATION_NEARBY, latitude, longitude);
+    let resp = reqwest::get(url).await?;
+    let locations = resp.json::<Vec<Location>>().await?;
+
+    Ok(locations)
+}
+
+
 
 #[cfg(test)]
 mod tests {
