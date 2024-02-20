@@ -1,8 +1,9 @@
 use serde::{Deserialize, Serialize};
 
 const MVG_STATIONS: &str = "https://www.mvg.de/.rest/zdm/stations";
+const MVG_STATION_GLOBAL_IDS: &str = "https://www.mvg.de/.rest/zdm/mvgStationGlobalIds";
 const MVG_LINES: &str = "https://www.mvg.de/.rest/zdm/lines";
-const MVG_DEPARTURES: &str = "https://www.mvg.de/api/fib/v2/departure?globalId=";
+const MVG_DEPARTURE: &str = "https://www.mvg.de/api/fib/v2/departure?globalId=";
 const MVG_LOCATION: &str = "https://www.mvg.de/api/fib/v2/location?query=";
 
 /// Represents a MVG station ("Haltestelle").
@@ -40,6 +41,20 @@ pub async fn request_stations() -> Result<Vec<Station>, Box<dyn std::error::Erro
     let stations = resp.json::<Vec<Station>>().await?;
 
     Ok(stations)
+}
+
+/// Represents a MVG global station id.
+///
+/// Examples of valid ids are "de:09162:1" and "de:09162:9029".
+type StationGlobalId = String;
+
+/// Retrieve a list of all station global ids.
+pub async fn request_station_global_ids() -> Result<Vec<StationGlobalId>, Box<dyn std::error::Error>>
+{
+    let resp = reqwest::get(MVG_STATION_GLOBAL_IDS).await?;
+    let ids = resp.json::<Vec<StationGlobalId>>().await?;
+
+    Ok(ids)
 }
 
 /// Represents a MVG line.
@@ -122,7 +137,7 @@ pub struct DepartureInfo {
 pub async fn request_departures<S: Into<String>>(
     global_id: S,
 ) -> Result<Vec<DepartureInfo>, Box<dyn std::error::Error>> {
-    let url = format!("{}{}", MVG_DEPARTURES, global_id.into());
+    let url = format!("{}{}", MVG_DEPARTURE, global_id.into());
     let resp = reqwest::get(url).await?;
     let departures = resp.json::<Vec<DepartureInfo>>().await?;
 
