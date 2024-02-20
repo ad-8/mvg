@@ -1,12 +1,14 @@
 use serde::{Deserialize, Serialize};
 
 const MVG_STATIONS: &str = "https://www.mvg.de/.rest/zdm/stations";
+const MVG_LINES: &str = "https://www.mvg.de/.rest/zdm/lines";
 const MVG_DEPARTURES: &str = "https://www.mvg.de/api/fib/v2/departure?globalId=";
 const MVG_LOCATION: &str = "https://www.mvg.de/api/fib/v2/location?query=";
 
 /// Represents a MVG station ("Haltestelle").
 ///
 /// ## Example API Response
+/// The first element of the response when querying the `/stations` endpoint:
 /// ```clojure
 /// {:abbreviation "KA",
 ///  :divaId 1,
@@ -38,6 +40,35 @@ pub async fn request_stations() -> Result<Vec<Station>, Box<dyn std::error::Erro
     let stations = resp.json::<Vec<Station>>().await?;
 
     Ok(stations)
+}
+
+/// Represents a MVG line.
+///
+/// # Example API Response
+/// Part of the response when querying the `/lines` endpoint:
+/// ```clojure
+/// ({:lineNumber -1, :name "N19", :product "TRAM"}
+///  {:lineNumber -1, :name "N20", :product "TRAM"}
+///  {:lineNumber -1, :name "N27", :product "TRAM"}
+///  {:lineNumber 2012, :name "12", :product "TRAM"}
+///  {:lineNumber 2016, :name "16", :product "TRAM"}
+///  {:lineNumber 2017, :name "17", :product "TRAM"})
+/// ```
+///
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Line {
+    pub line_number: Option<i32>,
+    pub name: Option<String>,
+    pub product: Option<String>,
+}
+
+/// Retrieve a list of all lines.
+pub async fn request_lines() -> Result<Vec<Line>, Box<dyn std::error::Error>> {
+    let resp = reqwest::get(MVG_LINES).await?;
+    let lines = resp.json::<Vec<Line>>().await?;
+
+    Ok(lines)
 }
 
 /// Represents information about an upcoming departure.
