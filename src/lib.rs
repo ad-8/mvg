@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 const MVG_LOCATION: &str = "https://www.mvg.de/api/fib/v2/location";
 const MVG_STATION_NEARBY: &str = "https://www.mvg.de/api/fib/v2/station/nearby";
 const MVG_DEPARTURE: &str = "https://www.mvg.de/api/fib/v2/departure";
+
 const MVG_STATIONS: &str = "https://www.mvg.de/.rest/zdm/stations";
 const MVG_STATION_GLOBAL_IDS: &str = "https://www.mvg.de/.rest/zdm/mvgStationGlobalIds";
 const MVG_LINES: &str = "https://www.mvg.de/.rest/zdm/lines";
@@ -37,7 +38,7 @@ pub struct Station {
 }
 
 /// Retrieve a list of all stations.
-pub async fn request_stations() -> Result<Vec<Station>, Box<dyn std::error::Error>> {
+pub async fn stations() -> Result<Vec<Station>, Box<dyn std::error::Error>> {
     let resp = reqwest::get(MVG_STATIONS).await?;
     let stations = resp.json::<Vec<Station>>().await?;
 
@@ -50,7 +51,7 @@ pub async fn request_stations() -> Result<Vec<Station>, Box<dyn std::error::Erro
 type StationGlobalId = String;
 
 /// Retrieve a list of all station global ids.
-pub async fn request_station_global_ids() -> Result<Vec<StationGlobalId>, Box<dyn std::error::Error>>
+pub async fn station_global_ids() -> Result<Vec<StationGlobalId>, Box<dyn std::error::Error>>
 {
     let resp = reqwest::get(MVG_STATION_GLOBAL_IDS).await?;
     let ids = resp.json::<Vec<StationGlobalId>>().await?;
@@ -80,7 +81,7 @@ pub struct Line {
 }
 
 /// Retrieve a list of all lines.
-pub async fn request_lines() -> Result<Vec<Line>, Box<dyn std::error::Error>> {
+pub async fn lines() -> Result<Vec<Line>, Box<dyn std::error::Error>> {
     let resp = reqwest::get(MVG_LINES).await?;
     let lines = resp.json::<Vec<Line>>().await?;
 
@@ -135,7 +136,7 @@ pub struct DepartureInfo {
 }
 
 /// Retrieve upcoming departures for a station.
-pub async fn request_departures<S: Into<String>>(
+pub async fn departures<S: Into<String>>(
     global_id: S,
 ) -> Result<Vec<DepartureInfo>, Box<dyn std::error::Error>> {
     let url = format!("{}?globalId={}", MVG_DEPARTURE, global_id.into());
@@ -183,7 +184,7 @@ pub struct Location {
 /// Find a location using a query string.
 ///
 /// Returns a list of locations, where the first element is the best match.
-pub async fn find_location<S: Into<String>>(
+pub async fn locations<S: Into<String>>(
     query: S,
 ) -> Result<Vec<Location>, Box<dyn std::error::Error>> {
     let url = format!("{}?query={}", MVG_LOCATION, query.into());
@@ -196,7 +197,7 @@ pub async fn find_location<S: Into<String>>(
 /// Find a nearby location via latitude and longitude.
 ///
 /// Returns a list of locations, where the first element is the best match.
-pub async fn find_nearby_location(
+pub async fn nearby_locations(
     latitude: f32, longitude: f32
 ) -> Result<Vec<Location>, Box<dyn std::error::Error>> {
     let url = format!("{}?latitude={}&longitude={}", MVG_STATION_NEARBY, latitude, longitude);
