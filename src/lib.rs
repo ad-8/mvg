@@ -23,7 +23,7 @@ const MVG_LINES: &str = "https://www.mvg.de/.rest/zdm/lines";
 ///  :products ["UBAHN" "BUS" "TRAM" "SBAHN"],
 ///  :tariffZones "m"}
 /// ```
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Station {
     pub abbreviation: Option<String>,
@@ -51,8 +51,7 @@ pub async fn stations() -> Result<Vec<Station>, Box<dyn std::error::Error>> {
 type StationGlobalId = String;
 
 /// Retrieve a list of all station global ids.
-pub async fn station_global_ids() -> Result<Vec<StationGlobalId>, Box<dyn std::error::Error>>
-{
+pub async fn station_global_ids() -> Result<Vec<StationGlobalId>, Box<dyn std::error::Error>> {
     let resp = reqwest::get(MVG_STATION_GLOBAL_IDS).await?;
     let ids = resp.json::<Vec<StationGlobalId>>().await?;
 
@@ -72,7 +71,7 @@ pub async fn station_global_ids() -> Result<Vec<StationGlobalId>, Box<dyn std::e
 ///  {:lineNumber 2017, :name "17", :product "TRAM"})
 /// ```
 ///
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Line {
     pub line_number: Option<i32>,
@@ -111,7 +110,7 @@ pub async fn lines() -> Result<Vec<Line>, Box<dyn std::error::Error>> {
 ///  :trainType "",
 ///  :transportType "SBAHN"}
 /// ```
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct DepartureInfo {
     pub banner_hash: Option<String>,
@@ -163,7 +162,7 @@ pub async fn departures<S: Into<String>>(
 ///  :transportTypes ["UBAHN" "BUS" "TRAM" "SBAHN"],
 ///  :type "STATION"}
 /// ```
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Location {
     pub aliases: Option<String>,
@@ -198,16 +197,18 @@ pub async fn locations<S: Into<String>>(
 ///
 /// Returns a list of locations, where the first element is the best match.
 pub async fn nearby_locations(
-    latitude: f32, longitude: f32
+    latitude: f32,
+    longitude: f32,
 ) -> Result<Vec<Location>, Box<dyn std::error::Error>> {
-    let url = format!("{}?latitude={}&longitude={}", MVG_STATION_NEARBY, latitude, longitude);
+    let url = format!(
+        "{}?latitude={}&longitude={}",
+        MVG_STATION_NEARBY, latitude, longitude
+    );
     let resp = reqwest::get(url).await?;
     let locations = resp.json::<Vec<Location>>().await?;
 
     Ok(locations)
 }
-
-
 
 #[cfg(test)]
 mod tests {
