@@ -7,7 +7,7 @@ license = "MIT"
 description = "Query timetable information and other data about Munich's public transport system"
 repository = "https://github.com/ad-8/mvg"
 readme = "README.md"
-keywords = ["Munich", "Munchen", "public transport", "OPNV", "MVG"]
+keywords = ["Munich", "Munchen", "transport", "OPNV", "MVG"]
 categories = ["api-bindings"]
 
 
