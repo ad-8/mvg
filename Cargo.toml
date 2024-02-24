@@ -1,10 +1,10 @@
 [package]
 name = "mvg"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 
 license = "MIT"
-description = "Query timetable information and other data about Munich's public transport system"
+description = "API wrapper to query timetable information and other data about Munich's public transport system"
 repository = "https://github.com/ad-8/mvg"
 readme = "README.md"
 keywords = ["Munich", "Munchen", "transport", "OPNV", "MVG"]

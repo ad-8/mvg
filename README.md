@@ -1,5 +1,5 @@
 ## About
-This crate provides a Rust API to communicate with the unofficial [MVG (Münchner Verkehrsgesellschaft)](https://www.mvg.de/) API.
+This crate provides a Rust API to communicate with the undocumented [MVG (Münchner Verkehrsgesellschaft)](https://www.mvg.de/) API.
 
 See the example section below, which shows how to query timetable information 
 and more for public transport in and around Munich.
